@@ -1,0 +1,24 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+
+
+input, textarea, .uneditable-input {
+    width: 50em;
+}
+
+
+
+label.error { float: none; color: red; padding-left: .5em; vertical-align: top; }
+p { clear: both; }
+
+
+
+
+
+
+
