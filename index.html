@@ -59,14 +59,7 @@
             <div class="row">
                 <div class="span12">
                     <h2>Output</h2>
-                    <p style="border-style:solid;height:10em;overflow:auto;">Donec id e
-<br>lit non mi porta gra
-<br>vida at eget metus. Fu
-<br>sce dapibus, tellus
-<br> ac cursus commodo, to
-<br>rtor mauris condimentum 
-<br>nibh, ut fermentum massa justo 
-<br>sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+                    <p id="output" style="border-style:solid;height:10em;overflow:auto;">Ready</p>
                 </div>
            </div>
 
@@ -87,6 +80,7 @@
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 	<script src="js/underscore.js"></script>
+	<script src="js/date.js"></script>
 	<script src="js/backbone.js"></script>
 	<script src="js/kalecser.replicator.js"></script>
 
@@ -99,10 +93,24 @@
        </script>
 
 	<script>
+		assert = function(condition, message){
+			if (!condition) $.error(message);
+		}
+		var TogglModel = Backbone.Model.extend({
+			initialize: function(args){
+				assert(args.token != null, "token must be provided");
+				assert(args.output != null, "output must be provided");
+				this.token = args.token;
+				this.output = args.output;
+				this.output.append("Toggl service started");
+			}
+		});
+
 		var TokensForm = Backbone.View.extend({
 			
-			initialize: function(){
+			initialize: function(args){
 				this.$el.validate();
+				this.output = args.output;
 			},
 
 			events: {
@@ -110,12 +118,30 @@
 			},
 			
 			doreplicate: function(){
-              			if (this.$el.valid()) alert("valid!!");
+              			if (this.$el.valid()){
+					var toggl = new TogglModel({token: $("#toggl-token").val(), output: this.output});
+				}
 			}
+
 			
 		});
-		$(form = new TokensForm({el: $("#tokens")}));
+	
+		var OutputView = Backbone.View.extend({
+			append: function(line){
+				this.output = (line + "\n");
+				this.render();
+			},
+			
+			render: function(){
+				this.$el.html(this.$el.html() + "<br/>" + Date.now().toString("HH:mm:ss") + " - "  + this.output);
+				otop = this.$el.find("br:last");
+				this.$el.scrollTop( this.$el.scrollTop() + this.$el.find("br:last").offset().top);
+			}
+		});
+
 		
+		$(output = new OutputView({el: $("#output")}));
+		$(form = new TokensForm({el: $("#tokens"), output: output}));
 		
 	</script>
     </body>
