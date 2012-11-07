@@ -47,11 +47,11 @@
             <!-- Main hero unit for a primary marketing message or call to action -->
             <div class="hero-unit">
             	<form id="tokens">
-                <h2>Toggl API token <em>*</em></h2>
-		<input size="50" class="required" id="toggl-token" name="toggl token"></input>
-		<h2>Mavenlink API token <em>*</em></h2>
-		<input size="50" class="required"></input>
-                <div align=right style="width:50em;margin-top: 10px"><a id="replicate" class="btn" href="#">Replicate time entries &raquo;</a></div>
+                <h3>Toggl API token <em>*</em></h3>
+		<input class="required" id="toggl-token" name="toggl token"></input>
+		<h3>Mavenlink API token <em>*</em></h3>
+		<input class="required"></input>
+                <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Replicate time entries &raquo;</a></div>
                 </form>
             </div>
 
@@ -86,6 +86,9 @@
 
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
+	<script src="js/underscore.js"></script>
+	<script src="js/backbone.js"></script>
+	<script src="js/kalecser.replicator.js"></script>
 
         <script>
             var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
@@ -93,16 +96,27 @@
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
 
-	    var tokensForm = $("#tokens");
-            
-             $(function(){
-	          tokensForm.validate();
-            });
-            
-	    $("#replicate").click(function(){
-              	if (tokensForm.valid()) alert("valid!!");
-	    });
-
        </script>
+
+	<script>
+		var TokensForm = Backbone.View.extend({
+			
+			initialize: function(){
+				this.$el.validate();
+			},
+
+			events: {
+				"click .btn": "doreplicate"
+			},
+			
+			doreplicate: function(){
+              			if (this.$el.valid()) alert("valid!!");
+			}
+			
+		});
+		$(form = new TokensForm({el: $("#tokens")}));
+		
+		
+	</script>
     </body>
 </html>

@@ -8,7 +8,7 @@
 
 
 input, textarea, .uneditable-input {
-    width: 50em;
+    width: 100%;
 }
 
 
@@ -18,7 +18,9 @@ p { clear: both; }
 
 
 
-
+.hero-unit{
+	padding: 20px;	
+}
 
 
 
