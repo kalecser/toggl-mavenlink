@@ -50,7 +50,7 @@
                 <h3>Toggl API token <em>*</em></h3>
 		<input class="required" id="toggl-token" name="toggl token"></input>
 		<h3>Mavenlink API token <em>*</em></h3>
-		<input class="required"></input>
+		<input class="required" id="mavenlink-token"></input>
                 <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Replicate time entries &raquo;</a></div>
                 </form>
             </div>
@@ -77,6 +77,8 @@
 
         <script src="js/vendor/bootstrap.min.js"></script>
 
+
+	<script src="js/base64.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 	<script src="js/underscore.js"></script>
@@ -96,13 +98,19 @@
 		assert = function(condition, message){
 			if (!condition) $.error(message);
 		}
-		var TogglModel = Backbone.Model.extend({
+		var ReplicatorModel = Backbone.Model.extend({
 			initialize: function(args){
-				assert(args.token != null, "token must be provided");
+				assert(args.togglToken != null, "toggl token must be provided");
+				assert(args.mavenlinkToken != null, "mavenlink token must be provided");
 				assert(args.output != null, "output must be provided");
 				this.token = args.token;
 				this.output = args.output;
-				this.output.append("Toggl service started");
+				this.output.append("Replicator service started");
+			},
+			replicate: function(){
+				$.ajax({
+				   url: "foo.txt"
+				});
 			}
 		});
 
@@ -119,7 +127,11 @@
 			
 			doreplicate: function(){
               			if (this.$el.valid()){
-					var toggl = new TogglModel({token: $("#toggl-token").val(), output: this.output});
+					var replicator = new ReplicatorModel({
+						togglToken: $("#toggl-token").val(), 
+						mavenlinkToken: $('#mavenlink-token').val(),  
+						output: this.output});
+					replicator.replicate();
 				}
 			}
 
