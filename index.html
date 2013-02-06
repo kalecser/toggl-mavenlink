@@ -78,7 +78,6 @@
         <script src="js/vendor/bootstrap.min.js"></script>
 
 
-	<script src="js/base64.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 	<script src="js/underscore.js"></script>
@@ -108,9 +107,15 @@
 				this.output.append("Replicator service started");
 			},
 			replicate: function(){
-				$.ajax({
-				   url: "foo.txt"
+				var that = this;	
+				req = $.ajax({
+				   url: "/toggl",
+				   type: "POST",
+				   data: JSON.stringify(this.attributes),
+				   success: function(resp){that.output.append(resp.output)},
+				   failure: function(ex) 	{}
 				});
+				
 			}
 		});
 
