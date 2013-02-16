@@ -58,7 +58,7 @@
             <!-- Example row of columns -->
             <div class="row">
                 <div class="span12">
-                    <h2>Output</h2>
+                    <h2>Monitor</h2>
                     <p id="output" style="border-style:solid;height:10em;overflow:auto;">Ready</p>
                 </div>
            </div>
@@ -66,7 +66,7 @@
             <hr>
 
             <footer>
-                <p>&copy; Kalecser Pasquali Kurtz 2012</p>
+                <p>&copy; Kalecser Pasquali Kurtz 2013</p>
             </footer>
 
         </div> <!-- /container -->
@@ -107,12 +107,13 @@
 				this.output.append("Replicator service started");
 			},
 			replicate: function(){
+				this.output.append("Requesting Toggl latest timeentries...");
 				var that = this;	
 				req = $.ajax({
 				   url: "/toggl",
 				   type: "POST",
-				   data: JSON.stringify(this.attributes),
-				   success: function(resp){that.output.append(resp.output)},
+				   data: JSON.parse(JSON.stringify(this.attributes)),
+				   success: function(resp){that.output.append(JSON.stringify(resp))},
 				   failure: function(ex) 	{}
 				});
 				

@@ -1,3 +1,5 @@
+_u = require("./underscore.js");
+
 var express = require('express');
 var app = express();
 
@@ -9,12 +11,45 @@ app.use(express.bodyParser());
 
 app
 .post('/toggl', function (req, resp){
-	var i = 0;
-	
-	resp.json({
-		data: 'foo',
-		output: 'got timelog from toggl'});
+	toggl(req.body, resp);
 })
 .get("/*", function (req, resp){
 	file.serve(req, resp);
 }).listen(8000);
+
+
+var toggl = function(req, resp){
+
+var request = require('request'),
+    password = "api_token",
+    username = req.togglToken,
+    url = "https://www.toggl.com/api/v6/time_entries.json",
+    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+request(
+    {
+        url : url,
+        headers : {
+            "Authorization" : auth
+        }
+    },
+    function (error, response, body) {
+
+
+	try {
+		var result = _u(JSON.parse(body).data).map(function(entry) {
+			return {
+				description: entry.description,
+				start: entry.start,
+				duration: entry.duration
+			}
+		});
+		resp.json(result);
+	}catch (ex) {
+		resp.json({error: 'Error accessing toggl, your api token : ' + req.togglToken + ' may not be valid'});
+	}
+
+    }
+);
+	
+};
