@@ -38,11 +38,9 @@ request(
 
 	try {
 		var result = _u(JSON.parse(body).data).map(function(entry) {
-			return {
-				description: entry.description,
-				start: entry.start,
-				duration: entry.duration
-			}
+			return [entry.description,
+				entry.start.substring(0,10),
+				(entry.duration / 60) /60 ]	
 		});
 		resp.json(result);
 	}catch (ex) {
