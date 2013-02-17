@@ -45,12 +45,14 @@
         <div class="container" style="height:100%;border:balck;border-style:solid">
 
             <!-- Main hero unit for a primary marketing message or call to action -->
-            <div class="hero-unit" style="height:40%">
+            <div class="hero-unit" style="height:45%;overflow:auto">
             	<form id="tokens">
-                <h4>Toggl API token <em>*</em></h4>
+                <h6>Toggl API token <em>*</em></h6>
 		<input class="required" id="toggl-token" name="toggl token"></input>
-		<h4>Mavenlink API token <em>*</em></h4>
-		<input class="required" id="mavenlink-token"></input>
+		<h6>Mavenlink API token <em>*</em></h6>
+		<input class="required" id="mavenlink-token" name="mavenlink token"></input>
+		 <h6>Mavenlink User ID <em>*</em></h6>
+                <input class="required" id="mavenlink-uid" name="mavenlink uid"></input>
                 <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Replicate time entries &raquo;</a></div>
                 </form>
             </div>
@@ -122,7 +124,7 @@
 				
 			},		
 			onTogglResponse: function(resp){
-				this.summarizedTogglEntries = asset.aggregateData(resp, ["groupby", "groupby", "sum"], ['true', 'true', 'true']);
+				this.summarizedTogglEntries = asset.aggregateData(resp, ["groupby", "sum"], ['true', 'true']);
 				this.output.append("<h2>Toggl entries:</h2> <br>" + this.summarizedTogglEntries.join("<br>"));
 				this.getMavenlinkEntries();
 				
@@ -134,9 +136,42 @@
                                    url: "/mavenlink",
                                    type: "POST",
                                    data: JSON.parse(JSON.stringify(this.attributes)),
-                                   success: function(resp){that.onTogglResponse(resp)},
+                                   success: function(resp){that.onMavenlinkResponse(resp)},
                                    failure: function(ex)        {}
                                 });
+
+			},              
+                        onMavenlinkResponse: function(resp){
+				var firstTogglEntryDate = this.summarizedTogglEntries[0][0];
+				resp = resp.filter(function (each) {return each[0] >= firstTogglEntryDate});
+                                this.summarizedMavenlinkEntries = asset.aggregateData(resp.reverse(), ["groupby", "sum"], ["true", "true"]);
+                                this.output.append("<h2>Mavenlink entries:</h2> <br>" + this.summarizedMavenlinkEntries.join("<br>"));
+				this.compare();
+                        },
+			compare : function(){
+				var that = this;
+				joinedResults = this.summarizedTogglEntries.map(function(togglEntry) {
+					var mlEntry = _(that.summarizedMavenlinkEntries).where({0:togglEntry[0]})[0];
+					togglEntry[2] = (mlEntry||[0,0])[1];
+					return togglEntry;
+				});
+
+				total = asset.aggregateData(joinedResults, ["first", "sum", "sum"], ["true", "true", "true"]);
+				total[0][0] = "TOTAL";
+				total = _(total[0]).map(function(e){return "<b>" + e + "</b>"});
+
+				joinedResults.push(total);
+				
+				joinedResults = joinedResults.map(function (e){ 
+					var result = "<tr>";
+					for (var i =0; i<e.length; i++){
+						result += "<td>" + e[i] + "</td>";
+					}
+					return result + "</tr>"
+				})
+				
+				this.output.append("<h2>Summarized entries:</h2> <br><table width=100%><tr><th>day</th><th>toggl</th><th>mavenlink</th></tr>" 
+					+ joinedResults.join("\n") + "</table>");
 			}
 		});
 
@@ -156,7 +191,8 @@
               			if (this.$el.valid()){
 					var replicator = new ReplicatorModel({
 						togglToken: $("#toggl-token").val(), 
-						mavenlinkToken: $('#mavenlink-token').val(),  
+						mavenlinkToken: $('#mavenlink-token').val(),
+						mavenlinkUser: $('#mavenlink-uid').val(), 
 						output: this.output});
 					replicator.replicate();
 				}
