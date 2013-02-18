@@ -53,7 +53,7 @@
 		<input class="required" id="mavenlink-token" name="mavenlink token"></input>
 		 <h6>Mavenlink User ID <em>*</em></h6>
                 <input class="required" id="mavenlink-uid" name="mavenlink uid"></input>
-                <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Replicate time entries &raquo;</a></div>
+                <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Compare time entries &raquo;</a></div>
                 </form>
             </div>
 
@@ -181,6 +181,9 @@
 			initialize: function(args){
 				this.$el.validate();
 				this.output = args.output;
+				$("#toggl-token").val(localStorage.togglToken||"");
+				$('#mavenlink-token').val(localStorage.mavenlinkToken||"");
+				$('#mavenlink-uid').val(localStorage.mavenlinkUser||"");
 			},
 
 			events: {
@@ -188,12 +191,21 @@
 			},
 			
 			doreplicate: function(){
+				var parameters = {
+                                                togglToken: $("#toggl-token").val(), 
+                                                mavenlinkToken: $('#mavenlink-token').val(),
+                                                mavenlinkUser: $('#mavenlink-uid').val()
+				};
+
+				for(var prop in parameters){
+					if (parameters.hasOwnProperty(prop))
+						localStorage[prop] = parameters[prop];
+				}
+
+				parameters.output = this.output;
+				
               			if (this.$el.valid()){
-					var replicator = new ReplicatorModel({
-						togglToken: $("#toggl-token").val(), 
-						mavenlinkToken: $('#mavenlink-token').val(),
-						mavenlinkUser: $('#mavenlink-uid').val(), 
-						output: this.output});
+					var replicator = new ReplicatorModel(parameters);
 					replicator.replicate();
 				}
 			}
