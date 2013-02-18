@@ -51,8 +51,8 @@
 		<input class="required" id="toggl-token" name="toggl token"></input>
 		<h6>Mavenlink API token under Settings->Edit Account Settings (<a href="mavenlink.com">here</a>) <em>*</em></h6>
 		<input class="required" id="mavenlink-token" name="mavenlink token"></input>
-		 <h6>Mavenlink User ID <em>*</em></h6>
-                <input class="required" id="mavenlink-uid" name="mavenlink uid"></input>
+		 <h6>Mavenlink User ID under Settings->Edit Account Settings (<a href="mavenlink.com">here</a>) <em>*</em></h6>
+                <input class="required digits" id="mavenlink-uid" name="mavenlink uid"></input>
                 <div align=right><a id="replicate" class="btn" style="margin-top:2em"  href="#">Compare time entries &raquo;</a></div>
                 </form>
             </div>
@@ -112,12 +112,17 @@
 				this.output.append("Replicator service started");
 			},
 			replicate: function(){
+				this.output.clear();
 				this.output.append("Requesting Toggl latest timeentries...");
 				var that = this;	
 				req = $.ajax({
 				   url: "/toggl",
 				   type: "POST",
-				   data: JSON.parse(JSON.stringify(this.attributes)),
+				   data: JSON.parse(JSON.stringify({
+					togglToken: that.attributes.togglToken,
+					mavenlinkToken: that.attributes.mavenlinkToken,
+					mavenlinkUser: that.attributes.mavenlinkUser
+					})),
 				   success: function(resp){that.onTogglResponse(resp)},
 				   failure: function(ex) 	{}
 				});
@@ -125,6 +130,7 @@
 			},		
 			onTogglResponse: function(resp){
 				this.summarizedTogglEntries = asset.aggregateData(resp, ["groupby", "sum"], ['true', 'true']);
+				this.output.append(JSON.stringify(resp));
 				this.output.append("<h2>Toggl entries:</h2> <br>" + this.summarizedTogglEntries.join("<br>"));
 				this.getMavenlinkEntries();
 				
@@ -135,15 +141,20 @@
                                 req = $.ajax({
                                    url: "/mavenlink",
                                    type: "POST",
-                                   data: JSON.parse(JSON.stringify(this.attributes)),
+                                   data:  JSON.parse(JSON.stringify({
+                                        togglToken: that.attributes.togglToken,
+                                        mavenlinkToken: that.attributes.mavenlinkToken,
+                                        mavenlinkUser: that.attributes.mavenlinkUser
+                                        })),
                                    success: function(resp){that.onMavenlinkResponse(resp)},
                                    failure: function(ex)        {}
                                 });
 
 			},              
                         onMavenlinkResponse: function(resp){
+				this.output.append(JSON.stringify(resp));
 				var firstTogglEntryDate = this.summarizedTogglEntries[0][0];
-				resp = resp.filter(function (each) {return each[0] >= firstTogglEntryDate});
+				resp = _(resp).filter(function (each) {return each[0] >= firstTogglEntryDate});
                                 this.summarizedMavenlinkEntries = asset.aggregateData(resp.reverse(), ["groupby", "sum"], ["true", "true"]);
                                 this.output.append("<h2>Mavenlink entries:</h2> <br>" + this.summarizedMavenlinkEntries.join("<br>"));
 				this.compare();
@@ -221,8 +232,13 @@
 			
 			render: function(){
 				this.$el.html(this.$el.html() + "<br/>" + Date.now().toString("HH:mm:ss") + " - "  + this.output);
-				otop = this.$el.find("br:last");
-				this.$el.scrollTop( this.$el.scrollTop() + this.$el.find("br:last").offset().top);
+				var that = this;
+				_.defer(function() {
+					that.$el.scrollTop( 9999999);
+				});
+			},
+			clear: function() {
+				 this.$el.html("");
 			}
 		});
 

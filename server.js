@@ -28,7 +28,7 @@ var toggl = function(req, resp){
 		var result = _u(JSON.parse(body).data).map(function(entry) {
 			return [
 				entry.start.substring(0,10).replace(/-/g, "/"),
-				(entry.duration / 60) /60 ]	
+				((entry.duration / 60) /60) < 0? 0: ((entry.duration / 60) /60) ]	
 		});
 		resp.json(result);
 		};
